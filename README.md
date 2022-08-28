@@ -1,51 +1,41 @@
 # lovr-joystick
 
-Joystick and Gamepad input module for LÖVR
+Joystick and Gamepad input module for [LÖVR](https://lovr.org) that leverages [GLFW](https://glfw.org) through [LuaJIT's FFI](https://luajit.org/ext_ffi.html).
 
 ### Usage
 
 ```lua
--- Require module
+-- Require the module for dealing with the Joystick/Gamepad
 lovr.joystick = require("lovr-joystick")
-local draw = false
 
--- Draw!
-function lovr.draw()
-  if draw then
-    lovr.graphics.print(lovr.joystick.getName(0), 0, 0, -5, 0.5)
+local name, error_code, error_message
+
+function lovr.load()
+  -- Try to retrieve the name of the first Joystick/Gamepad
+  name, error_code, error_message = lovr.joystick.getName(0)
+  
+  -- If failed, Set the name to the error message.
+  if (error_code ~= lovr.joystick.errors.NONE) then
+    name = error_message
   end
 end
 
--- Update!
-function lovr.update()
-  -- If joystick with index 0 (First joystick) is available and x button pressed then
-  -- draw text contains first joystick name!
-  if lovr.joystick.isAvailable(0) then
-    draw = lovr.joystick.isDown(0, "x")
-  end
+function lovr.draw()
+  -- Draw the name of the first Joystick/Gamepad, Or the error message if failed to retrieve the name.
+  lovr.graphics.print(name, 0, 0, -5, 0.5)
 end
 ```
 
-### API
+Check out the [API](https://github.com/Rabios/lovr-joystick/blob/master/API.md) for more informations on using the library.
 
-- `joystick.isAvailable(id)` returns true if joystick/gamepad with id is available/present.
-- `joystick.isConnected(id)` returns true if joystick/gamepad is connected, Otherwise returns false.
-- `joystick.isDown(id, button)` returns true if button is hold down from joystick/gamepad with id.
-- `joystick.getName(id)` returns string contains joystick/gamepad name.
-- `joystick.getAxes(id)` returns array contains joystick/gamepad axes.
-- `joystick.getHats(id)` returns array contains joystick/gamepad hats.
-- `joystick.getGUID(id)` returns string contains GUID of the joystick/gamepad.
-- `joystick.isGamepad(id)` returns true if joystick is actually gamepad.
-- `joystick.updateGamepadMappings(str)` updates gamepad controls from string.
-- `joystick.getGamepadName(id)` if your joystick is gamepad, This can be used to get name of gamepad.
+### Support and Troubleshooting
 
-### NOTES
+1. If LÖVR throws error due to missing procedure(s) then replace the shared library of GLFW (Which comes along LÖVR files) with the latest one from [GLFW Downloads](https://www.glfw.org/download.html)
 
-1. Buttons and Joystick/Gamepad ID (index) is value from 0 (First joystick/gamepad) to 14 (Buttons), or to 15 (index).
-2. Hats array and Axes array index starts from 0 (NOT 1).
-3. If LÖVR throws error that says missing procedure(s), Get latest 64-bit [pre-compiled binaries of GLFW3 library](https://www.glfw.org/download.html) and replace those ones in LÖVR directory with them.
-4. Calling `joystick.isConnected(id)` in `lovr.update` without a way to stop or limit loop of calling `joystick.isConnected(id)` might cause callback overflow error.
+2. As of the latest commit, The annotations for [Lua Language Server](https://github.com/sumneko/lua-language-server) is provided so it will help in case you are using [Visual Studio Code](https://code.visualstudio.com)
+
+3. If you want to use `lovr-joystick` outside of LÖVR within another Lua game engine/framework that leverages GLFW then it's possible, Keep in mind that you are calling the functions after initializing GLFW and without dereferencing via `lovr.`
 
 ### License
 
-Check [`LICENSE.txt`](https://github.com/Rabios/lovr-joystick/blob/master/LICENSE.txt) for license.
+MIT, Check [`LICENSE.txt`](https://github.com/Rabios/lovr-joystick/blob/master/LICENSE.txt) for license.
